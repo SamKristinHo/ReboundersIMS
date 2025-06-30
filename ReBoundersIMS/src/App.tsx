@@ -1,4 +1,9 @@
-import { Fragment, use, useState } from "react";
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
+
+import { Fragment, useState } from "react";
 import "./App.css";
 import Login from "./components/login";
 
@@ -14,17 +19,39 @@ function App() {
    *  3. Resource view (true/false)
    *
    */
-  const [loginPageView, setLoginPageView] = useState(true);
+  //const [loginPageView, setLoginPageView] = useState(true);
   const [loginStatus, setLoggedInStatus] = useState(false);
   const [calendarPageView, setCalendarPageView] = useState(false);
   const [resourcePageView, setResourcePageView] = useState(false);
+
+  /**
+   * @description This section defines event handlers that interacts from
+   * components
+   */
+
   return (
-    <Fragment>
-      <Login onLoggedIn={() => setLoggedInStatus(true)}>
-        Welcome! Please Login.
-      </Login>
-      ;
-    </Fragment>
+    // Head Level: START Parent Element
+    <div>
+      <section id="topOfPage">
+        <div>
+          {!loginStatus ? (
+            <Fragment>
+              <Login onLoggedIn={() => setLoggedInStatus(true)}>
+                Welcome! Please Login.
+              </Login>
+            </Fragment>
+          ) : (
+            <h1>successful login placeholder</h1>
+          )}
+        </div>
+      </section>
+
+      <section id="middleOfPage">
+        <div>
+          <h1>second section first div</h1>
+        </div>
+      </section>
+    </div> // Head Level: END Parent Element
   );
 }
 
