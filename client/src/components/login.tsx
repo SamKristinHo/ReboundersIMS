@@ -17,6 +17,9 @@
 
 import { Fragment, useState } from "react";
 import { Button, Box, TextField } from "@mui/material";
+import { auth } from "../lib/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
+//import { onAuthStateChanged } from "firebase/auth";
 
 interface loginProps {
   children: string;
@@ -34,6 +37,7 @@ function Login({ children, onLoggedIn }: loginProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [invalidLogin, setInvalidLogin] = useState(false);
 
   /**
    * Local Event Handler for credentials submit (Login Button Press)
@@ -47,13 +51,30 @@ function Login({ children, onLoggedIn }: loginProps) {
     e.preventDefault();
     setSubmitted(true);
     if (email && password) {
-      onLoggedIn(); // TODO:only trigger this when firebase auth is successful
-      console.log(email);
-      console.log(password);
-      // send to firebase authentication here
-      // handle errors: login account not found, password incorrect etc
+      signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const user = userCredential.user;
+          setInvalidLogin(false);
+          onLoggedIn();
+        })
+        .catch((error) => {
+          setInvalidLogin(true);
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.log("Login Error Code:" + errorCode);
+          console.log("Login Error Message:" + errorMessage);
+          console.log("Credentials Entered:");
+          console.log(email);
+          console.log(password);
+        });
     }
   };
+
+  /**
+   *
+   *
+   */
 
   return (
     <Fragment>
@@ -99,7 +120,13 @@ function Login({ children, onLoggedIn }: loginProps) {
           />
         </div>
       </Box>
-
+      <div>
+        {invalidLogin ? (
+          <p style={{ color: "red" }}>
+            Invalid credentials entered. Please enter correct admin credentials.
+          </p>
+        ) : null}
+      </div>
       <Button
         variant="contained"
         disableElevation

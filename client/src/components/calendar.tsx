@@ -26,9 +26,8 @@ import dayGridPlugin from "@fullcalendar/daygrid"; // Month view
 import timeGridPlugin from "@fullcalendar/timegrid"; // Week and Day views
 import interactionPlugin from "@fullcalendar/interaction"; // Optional, for interactivity
 import rrulePlugin from "@fullcalendar/rrule"; // For recurring events
-/*
-import resourceTimeGridPlugin from "@fullcalendar/resource-timegrid/index.js";
-*/
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../lib/firebase";
 import { useState, useEffect, useRef } from "react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -43,6 +42,8 @@ import {
 
 import EventDetailModal from "./EventDetailModal";
 import "../App.css";
+//import { onAuthStateChanged } from "firebase/auth";
+// import { auth } from "../lib/firebase";
 
 type CalendarEvent = {
   id: string;
@@ -94,20 +95,31 @@ const Calendar = () => {
     end: "",
   });
 
-  // fetch all events once and set them to render
-  // TODO:need to specific events as an array of acceptable json input to
-  // FullCalender
   // useEffects affect everyting outside of DOM, itself can't be async so must declare
   // another async funct inside
+  // only calling fetchData if user is signed in
   useEffect(() => {
-    const fetchData = async () => {
-      const calendarEvents = await fetchEvents();
-      console.log("⏰ Final Events sent to FullCalendar:", calendarEvents);
-      setEvents(calendarEvents);
-    };
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const fetchData = async () => {
+          const calendarEvents = await fetchEvents();
+          console.log("⏰ Final Events sent to FullCalendar:", calendarEvents);
+          setEvents(calendarEvents);
+        };
+        fetchData();
+      } else {
+        console.log("User not logged in. Skipping event fetch.");
+      }
 
-    fetchData(); // Call the async function
+      return () => unsubscribe();
+    });
   }, []);
+
+  // refresh function to be used whenever events are updated
+  const refreshEvents = async () => {
+    const calendarEvents = await fetchEvents();
+    setEvents(calendarEvents);
+  };
 
   //const isSidebarOpen = selectedEvent.title !== "";
   const calendarRef = useRef<FullCalendar | null>(null);

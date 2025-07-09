@@ -207,14 +207,23 @@ const transformData = (data: RawEvent[]): CalendarEvent[] => {
  * @returns all rows from current CalendarEvents db
  */
 export const fetchEvents = async () => {
-  console.log("in events.tsx fetch before fetching from ./api/events");
-  const res = await fetch(BASE_URL);
-  console.log(
-    "in fetch from events.tsx frontend API, after fetching from base-url"
-  );
-  const data: RawEvent[] = await res.json();
-  console.log(await res);
-  return transformData(data);
+  try {
+    const res = await fetch(BASE_URL);
+    console.log("📥 Received response:", res);
+    console.log(
+      "in try block of fetch from events.tsx frontend API, after fetching from base-url"
+    );
+    if (!res.ok) {
+      throw new Error(`❌ Server responded with status ${res.status}`);
+    }
+
+    const data: RawEvent[] = await res.json();
+    console.log(await res);
+    return transformData(data);
+  } catch (error) {
+    console.error("❗ fetchEvents failed:", error);
+    return []; // Return an empty array to avoid crashing FullCalendar
+  }
 };
 
 /**
